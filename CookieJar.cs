@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Security;
-using System.Security.Principal;
-using System.Runtime.InteropServices;
 using System.ComponentModel;
+using System.Runtime.InteropServices;
+using System.Security.Principal;
 
-namespace TestTools
+namespace CSImpersonator
 {
     public class CookieJar: 
         IDisposable
@@ -43,24 +39,23 @@ namespace TestTools
         private static extern bool CloseHandle(
             IntPtr handle);
 
-        private const int LOGON32_LOGON_INTERACTIVE = 2;
-        private const int LOGON32_PROVIDER_DEFAULT = 0;
+        private const int Logon32LogonInteractive = 2;
+        private const int Logon32ProviderDefault = 0;
         #endregion
         private void ImpersonateUser(string username, string domainname, string password)
         {
-            WindowsIdentity tempIdentity = null;
             IntPtr token = IntPtr.Zero;
             IntPtr tokenDuplicate = IntPtr.Zero;
             try
             {
                 if (RevertToSelf())
                 {
-                    if (LogonUser(username, domainname, password, LOGON32_LOGON_INTERACTIVE, LOGON32_PROVIDER_DEFAULT, ref token) != 0)
+                    if (LogonUser(username, domainname, password, Logon32LogonInteractive, Logon32ProviderDefault, ref token) != 0)
                     {
                         if (DuplicateToken(token, 2, ref tokenDuplicate) != 0)
                         {
-                            tempIdentity = new WindowsIdentity(tokenDuplicate);
-                            impersonationContext = tempIdentity.Impersonate();
+                            var tempIdentity = new WindowsIdentity(tokenDuplicate);
+                            _impersonationContext = tempIdentity.Impersonate();
                         }
                         else
                         {
@@ -94,12 +89,10 @@ namespace TestTools
         }
         private void UndoImpersonation()
         {
-            if(impersonationContext != null)
-            {
-                impersonationContext.Undo();
-            }
+            _impersonationContext?.Undo();
         }
-        private WindowsImpersonationContext impersonationContext = null;
+
+        private WindowsImpersonationContext _impersonationContext;
     }
    
 }
