@@ -2,16 +2,14 @@
 
 namespace CSImpersonator
 {
-    class Program
+    internal class Program
     {
-        static void Main()
+        private static void Main()
         {
-            //using(new 
             Console.WriteLine("Logged in User: " + Environment.UserName);
-            using(new CookieJar("user","domain","password"))
+            using (new CookieJar("user", "domain", "password"))
             {
                 Console.WriteLine("Logged in user: " + Environment.UserName);
-                
             }
             Console.WriteLine("Logged in User:" + Environment.UserName);
         }
